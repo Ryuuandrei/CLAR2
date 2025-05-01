@@ -1,0 +1,58 @@
+#version 460
+#extension GL_EXT_ray_tracing : require  // Enable ray tracing extensions
+
+// Define sphere properties
+struct Sphere {
+    vec3 center;
+    float radius;
+};
+
+// Declare a buffer or uniform for the sphere
+//layout(set = 0, binding = 0) uniform SphereData {
+//    Sphere sphere;
+//} ubo;
+
+vec3 center = vec3(0.0, 1.0, 4.0);
+float radius = 1.0;
+
+hitAttributeEXT vec3 hitNormal; // Stores the normal of the hit point
+
+// Sphere-ray intersection function
+bool intersectSphere(vec3 rayOrigin, vec3 rayDir, out float tHit, out vec3 hitPos) {
+    vec3 oc = rayOrigin - center;
+    float a = dot(rayDir, rayDir);
+    float b = 2.0 * dot(oc, rayDir);
+    float c = dot(oc, oc) - radius * radius;
+    float discriminant = b * b - 4.0 * a * c;
+
+    if (discriminant < 0.0) {
+        return false; // No intersection
+    } else {
+        float sqrtDiscriminant = sqrt(discriminant);
+        float t0 = (-b - sqrtDiscriminant) / (2.0 * a);
+        float t1 = (-b + sqrtDiscriminant) / (2.0 * a);
+
+        tHit = (t0 < t1 && t0 > 0.0) ? t0 : t1; // Select nearest intersection
+        if (tHit < 0.0) return false;           // Check for positive tHit only
+
+        // Calculate the hit position
+        hitPos = rayOrigin + tHit * rayDir;
+        return true;
+    }
+}
+
+// Main intersection shader entry point
+void main() {
+    float tHit;
+    vec3 hitPos;
+
+    // Fetch the ray parameters
+    vec3 rayOrigin = gl_WorldRayOriginEXT;
+    vec3 rayDir = gl_WorldRayDirectionEXT;
+
+    // Check for intersection
+    if (intersectSphere(rayOrigin, rayDir, tHit, hitPos)) {
+        hitNormal = normalize(hitPos - center); // Compute normal at hit
+        reportIntersectionEXT(tHit, 0); // Report intersection with `tHit` distance
+    }
+}

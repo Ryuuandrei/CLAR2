@@ -1,0 +1,232 @@
+#version 460
+#extension GL_EXT_ray_tracing: require
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_NV_ray_tracing : require
+
+#include "../raycommon.glsl"
+
+layout(location = 0) rayPayloadEXT hitPayload prd;
+
+layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
+layout(set = 0, binding = 1, rgba32f) uniform image2D lastImage;
+layout(set = 0, binding = 2, rgba32f) uniform image2D currentImage;
+
+layout(set = 1, binding = 0) uniform UniformBufferObject {
+	mat4 prev_view;
+    mat4 prev_proj;
+    mat4 model;
+    mat4 inverseView;
+    mat4 inverseProj;
+} ubo;
+
+layout(push_constant) uniform _PushConstantRay {
+    vec4  clearColor;
+    float deltaTime;
+    float time;
+    int   lightsNumber;
+} pcRay;
+
+float luminance(vec3 c) {
+    return dot(c, vec3(0.2126, 0.7152, 0.0722));
+}
+
+
+//vec3 CalcClipNeighbourhood (const in image2D currentMap, const in vec2 resolution, const in vec3 lastLight, const in vec2 texCoord)
+//{
+//	vec3 color_min = vec3 (1.0);
+//	vec3 color_max = vec3 (0.0);
+//
+//	vec2 texelSize = vec2 (1.0) / resolution;
+//
+//	for (int i = -1; i <= 1; i++) {
+//		for (int j = -1; j <= 1; j++) {
+//			vec3 color = texture2D (currentMap, texCoord + vec2 (i, j) * texelSize).xyz;
+//			color = RGBToYCoCg (color);
+//
+//			color_min = min (color_min, color);
+//			color_max = max (color_max, color);
+//		}
+//	}
+//
+//	vec3 colorSample = RGBToYCoCg (lastLight);
+//
+//	vec3 p_clip = 0.5 * (color_max + color_min);
+//	vec3 e_clip = 0.5 * (color_max - color_min);
+//
+//	vec3 v_clip = colorSample - p_clip;
+//	vec3 v_unit = v_clip / e_clip;
+//	vec3 a_unit = abs (v_unit);
+//	float max_unit = max (a_unit.x, max (a_unit.y, a_unit.z));
+//
+//	if (max_unit > 1.0) {
+//		return YCoCgToRGB (p_clip + v_clip / max_unit);
+//	}
+//
+//	return lastLight;
+//}
+
+
+void main()
+{
+    const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
+    const vec2 inUV = pixelCenter/vec2(gl_LaunchSizeEXT.xy);
+    vec2 d = inUV * 2.0 - 1.0;
+
+    mat4 inverseProj = ubo.inverseProj;
+    mat4 inverseView = ubo.inverseView;
+
+    vec4 cameraCenter = inverseView[3];
+//    vec3 lookat = -vec3(ubo.view[0][2], ubo.view[1][2], ubo.view[2][2]);
+//
+//    vec3 w = normalize(cameraCenter.xyz - lookat);
+//    vec3 u = normalize(cross(vec3(0, 1, 0), w));
+//    vec3 v = cross(w, u);
+//
+//    float defocus_radius = 10.0 * tan(radians(0.6 / 2));
+//    vec3 defocus_disk_u = u * defocus_radius;       // Defocus disk horizontal radius
+//    vec3 defocus_disk_v = v * defocus_radius;       // Defocus disk vertical radius
+
+    uint  rayFlags = gl_RayFlagsOpaqueEXT;
+    float tMin     = 0.0001;
+    float tMax     = 10000.0;
+
+    int sample_count = 16;
+    const int sqrt_sample_count = int(sqrt(sample_count));
+    float sample_scale = 1.0 / (sqrt_sample_count * sqrt_sample_count);
+
+    vec3 color = vec3(0.0);
+    vec2 seed = vec2(pcRay.time);
+//    seed = cameraCenter.yx;
+       
+    // for the depth buffer
+    vec4 worldPos = vec4(0.0, 0.0, 0.0, 1.0);
+    const float spread = 400.0;
+    const float spread_offset = 1 / (2 * spread);
+    int mid = sqrt_sample_count / 2;
+
+    for (int i = 0; i < sqrt_sample_count; i++)
+    {
+        for (int j = 0; j < sqrt_sample_count; j++)
+		{
+            bool shouldStoreWorldPos = (i == mid && j == mid);
+
+            vec2 offset = vec2((i + random(seed + i)), (j + random(seed + j))) / sqrt_sample_count / spread - spread_offset;
+            if (i == mid && j == mid)
+                offset = vec2(0.0);
+
+            vec4 target    = inverseProj * vec4(d + offset, 1, 1);
+            vec4 direction = inverseView * vec4(normalize(target.xyz), 0);
+
+//            vec3 p = random3D(target.xy);
+
+//            prd.nextOrigin = cameraCenter.xyz; //+ (p.x * defocus_disk_u) + (p.y * defocus_disk_v);
+            prd.nextDirection = direction.xyz;
+            prd.hitValue = vec3(1.0);
+            prd.miss = false;
+            prd.worldHitPos = cameraCenter.xyz;
+
+            // max 10 bounces
+            for (int k = 0; k < 20 && !prd.miss; k++)
+		    {
+                traceRayEXT(topLevelAS, // acceleration structure
+                        rayFlags,       // rayFlags
+                        0xFF,           // cullMask
+                        0,              // sbtRecordOffset
+                        0,              // sbtRecordStride
+                        0,              // missIndex
+                        prd.worldHitPos,     // ray origin
+                        tMin,           // ray min range
+                        prd.nextDirection,  // ray direction
+                        tMax,           // ray max range
+                        0              // payload (location = 0)
+                );
+
+                if (shouldStoreWorldPos && k == 0 && prd.worldHitPos != cameraCenter.xyz)
+				{
+					worldPos = vec4(prd.worldHitPos, 1.0);
+				}
+            }
+//            if (!prd.miss)
+//                prd.hitValue = vec3(0.0, 0.0, 0.0);
+            color += prd.hitValue;
+        }
+    }
+//
+//    imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), vec4(1.0, 1.0, 0.0, 1.0));
+//    return;
+
+//    if (color != color)
+//		color = vec3(0.0, 0.0, 0.0);
+    vec4 currentColor = vec4(color * sample_scale, 1.0);
+
+
+    if (worldPos == vec4(0.0, 0.0, 0.0, 1.0))
+    {
+        imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), currentColor);
+        return;
+    }
+
+    vec4 prevClip = ubo.prev_proj * ubo.prev_view * worldPos;
+    vec3 prevNDC = prevClip.xyz / prevClip.w;
+    vec2 prevUV  = prevNDC.xy * 0.5 + 0.5;
+
+    vec4 lastColor = vec4(0.0);
+    float blendWeight = 0.90;
+
+    if (all(greaterThanEqual(prevUV, vec2(0.0))) && all(lessThanEqual(prevUV, vec2(1.0)))) {
+        ivec2 prevPixel = ivec2(prevUV * vec2(imageSize(lastImage)));
+        lastColor = imageLoad(lastImage, prevPixel);
+    }
+    else
+    {
+    	imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), currentColor);
+        return;
+	}
+    
+//    if (any(greaterThan(abs(lastColor - currentColor).xyz, vec3(0.5))))
+//    {
+//        imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), currentColor);
+//        return;
+//    }
+
+//    float lumDiff = abs(dot(currentColor.rgb - lastColor.rgb, vec3(0.2126, 0.7152, 0.0722)));
+//    float _discard = step(0.2, lumDiff);
+//    blendWeight *= (1.0 - _discard);
+
+//    float colorDiff = length(currentColor.rgb - lastColor.rgb);
+//    float noiseTolerance = 0.1 + 0.4 * length(lastColor.rgb); // brighter pixels tolerate more noise
+//    if (colorDiff > noiseTolerance) {
+//        imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), currentColor);
+//        return;
+//    }
+
+//    float brightness = dot(currentColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+//    float lastBrightness = dot(lastColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+//    float combinedBrightness = max(brightness, lastBrightness);
+////    float tolerance = 0.05 + 0.65 * combinedBrightness;
+////    float tolerance = 0.05 + 0.25 * brightness;
+//    float tolerance = 0.05 + 0.3 * pow(combinedBrightness, 1.5);
+//
+//    float colorDiff = length(currentColor.rgb - lastColor.rgb);
+//    float discardHistory = step(tolerance, colorDiff);
+//
+//    blendWeight *= (1.0 - discardHistory);
+
+    // Adjust based on time — bigger frameTime → more weight on current frame
+    blendWeight = pow(0.95, pcRay.deltaTime * 60.0);
+
+
+//    float lumDiff = abs(luminance(currentColor.rgb) - luminance(lastColor.rgb));
+//    if (lumDiff > 0.2) {
+//        imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), currentColor);
+//        return;
+//    }
+    
+    if (lastColor == vec4(0.0, 0.0, 0.0, 1.0))
+	{
+		imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), currentColor);
+		return;
+	}
+    vec4 finalColor = mix(currentColor, lastColor, blendWeight);
+    imageStore(currentImage, ivec2(gl_LaunchIDEXT.xy), finalColor);
+}

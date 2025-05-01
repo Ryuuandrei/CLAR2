@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{8ce2feb8-65d8-4268-8fa8-0ff1d1d91792}</ProjectGuid>
+    <RootNamespace>CLAR2</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)CLAR2\vendors;$(SolutionDir)glfw\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\VulkanSDK\1.3.283.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)glfw\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.283.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)CLAR2\vendors;$(SolutionDir)glfw\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\VulkanSDK\1.3.283.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)glfw\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.283.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\application.cpp" />
+    <ClCompile Include="src\ClarAllocator.cpp" />
+    <ClCompile Include="src\ClarComputePipeline.cpp" />
+    <ClCompile Include="src\ClarComputeSystem.cpp" />
+    <ClCompile Include="src\ClarDescriptors.cpp" />
+    <ClCompile Include="src\ClarGraphicsPipeline.cpp" />
+    <ClCompile Include="src\ClarIndexBuffer.cpp" />
+    <ClCompile Include="src\ClarModel.cpp" />
+    <ClCompile Include="src\ClarPipelineBuilder.cpp" />
+    <ClCompile Include="src\ClarRayTracingPipeline.cpp" />
+    <ClCompile Include="src\ClarRayTracingSystem.cpp" />
+    <ClCompile Include="src\ClarRenderer.cpp" />
+    <ClCompile Include="src\ClarRenderSystem.cpp" />
+    <ClCompile Include="src\ClarRTBuilder.cpp" />
+    <ClCompile Include="src\ClarShaderStorageBuffer.cpp" />
+    <ClCompile Include="src\ClarTextureManager.cpp" />
+    <ClCompile Include="src\ClarUbo.cpp" />
+    <ClCompile Include="src\ClarVertexBuffer.cpp" />
+    <ClCompile Include="src\clar_device.cpp" />
+    <ClCompile Include="src\clar_swap_chain.cpp" />
+    <ClCompile Include="src\clar_validation_layers.cpp" />
+    <ClCompile Include="src\clar_window.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="vendors\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="vendors\imgui\imgui.cpp" />
+    <ClCompile Include="vendors\imgui\imgui_demo.cpp" />
+    <ClCompile Include="vendors\imgui\imgui_draw.cpp" />
+    <ClCompile Include="vendors\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendors\imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="vendors\imgui\imgui_tables.cpp" />
+    <ClCompile Include="vendors\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="vendors\vma\VmaUsage.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\application.h" />
+    <ClInclude Include="src\ClarAllocator.h" />
+    <ClInclude Include="src\ClarBuffer.h" />
+    <ClInclude Include="src\ClarCamera.h" />
+    <ClInclude Include="src\ClarComputePipeline.h" />
+    <ClInclude Include="src\ClarComputeSystem.h" />
+    <ClInclude Include="src\ClarDescriptors.h" />
+    <ClInclude Include="src\ClarGraphicsPipeline.h" />
+    <ClInclude Include="src\ClarGridSystem.h" />
+    <ClInclude Include="src\ClarIndexBuffer.h" />
+    <ClInclude Include="src\ClarMaterial.h" />
+    <ClInclude Include="src\ClarModel.h" />
+    <ClInclude Include="src\ClarParticleSystem.h" />
+    <ClInclude Include="src\ClarPipeline.h" />
+    <ClInclude Include="src\ClarPipelineBuilder.h" />
+    <ClInclude Include="src\ClarRayTracingPipeline.h" />
+    <ClInclude Include="src\ClarRayTracingSystem.h" />
+    <ClInclude Include="src\ClarRenderer.h" />
+    <ClInclude Include="src\ClarRenderSystem.h" />
+    <ClInclude Include="src\ClarRTBuilder.h" />
+    <ClInclude Include="src\ClarShaderStorageBuffer.h" />
+    <ClInclude Include="src\ClarTextureManager.h" />
+    <ClInclude Include="src\ClarUbo.h" />
+    <ClInclude Include="src\ClarVertexBuffer.h" />
+    <ClInclude Include="src\clar_debug_messenger.h" />
+    <ClInclude Include="src\clar_device.h" />
+    <ClInclude Include="src\clar_queue_family_indices.h" />
+    <ClInclude Include="src\clar_swapchain_support_details.h" />
+    <ClInclude Include="src\clar_swap_chain.h" />
+    <ClInclude Include="src\clar_validation_layers.h" />
+    <ClInclude Include="src\clar_vertex.h" />
+    <ClInclude Include="src\clar_window.h" />
+    <ClInclude Include="src\Particle.h" />
+    <ClInclude Include="src\PostSystem.h" />
+    <ClInclude Include="src\utils\Timer.h" />
+    <ClInclude Include="vendors\imguizmo\ImGuizmo.h" />
+    <ClInclude Include="vendors\imgui\imconfig.h" />
+    <ClInclude Include="vendors\imgui\imgui.h" />
+    <ClInclude Include="vendors\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="vendors\imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="vendors\imgui\imgui_internal.h" />
+    <ClInclude Include="vendors\imgui\imstb_rectpack.h" />
+    <ClInclude Include="vendors\imgui\imstb_textedit.h" />
+    <ClInclude Include="vendors\imgui\imstb_truetype.h" />
+    <ClInclude Include="vendors\vma\VmaUsage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\compile.bat" />
+    <None Include="shaders\frag.spv" />
+    <None Include="shaders\grid.frag" />
+    <None Include="shaders\grid.frag.spv" />
+    <None Include="shaders\grid.vert" />
+    <None Include="shaders\grid.vert.spv" />
+    <None Include="shaders\particle.comp" />
+    <None Include="shaders\particle.comp.spv" />
+    <None Include="shaders\particle.frag" />
+    <None Include="shaders\particle.frag.spv" />
+    <None Include="shaders\particle.vert" />
+    <None Include="shaders\particle.vert.spv" />
+    <None Include="shaders\post.frag" />
+    <None Include="shaders\post.vert" />
+    <None Include="shaders\raycommon.glsl" />
+    <None Include="shaders\rtShaders\raytrace.rchit" />
+    <None Include="shaders\rtShaders\raytrace.rint" />
+    <None Include="shaders\rtShaders\raytrace.rmiss" />
+    <None Include="shaders\shader.frag" />
+    <None Include="shaders\shader.vert" />
+    <None Include="shaders\vert.spv" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
