@@ -24,6 +24,8 @@ namespace CLAR {
 	extern PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR;
 	extern PFN_vkCmdWriteAccelerationStructuresPropertiesKHR vkCmdWriteAccelerationStructuresPropertiesKHR;
 	extern PFN_vkCmdCopyAccelerationStructureKHR vkCmdCopyAccelerationStructureKHR;
+	extern PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT;
+	extern PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT;
 
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -35,8 +37,6 @@ namespace CLAR {
 		VK_KHR_SPIRV_1_4_EXTENSION_NAME,
 		VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
 		VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-		VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
-		VK_NV_RAY_TRACING_EXTENSION_NAME
 	};
 
 	class Device {

@@ -42,7 +42,7 @@ namespace CLAR {
 		template<typename T>
 		Buffer CreateBuffer(const std::vector<T>& elements, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags = 0) const;
 		template<typename T>
-		Buffer CreateBuffer(const T& elements, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags = 0) const;
+		Buffer CreateBuffer(const T& element, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags = 0) const;
 
 		Image CreateImage(VkExtent2D size, VkFormat format, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags = 0, VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT, uint32_t mipLevels = 1) const;
 		Texture CreateTexture(const Image& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) const;

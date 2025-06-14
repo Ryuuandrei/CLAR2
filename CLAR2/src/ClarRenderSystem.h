@@ -14,7 +14,7 @@ namespace CLAR {
 		virtual void CreatePipelineLayout(const VkDescriptorSetLayout* descriptorSetLayout);
 		virtual void CreatePipeline(VkRenderPass renderPass, VkExtent2D extent, const std::filesystem::path& vertShaderPath = "shaders/vert.spv", const std::filesystem::path& fragShaderPath = "shaders/frag.spv");
 
-		void Prepare(const VkCommandBuffer commandBuffer, const VkDescriptorSet* descriptorSet) const;
+		virtual void Prepare(const VkCommandBuffer commandBuffer, const VkDescriptorSet* descriptorSet) const;
 
 		void BindPL(VkCommandBuffer commandBuffer) const;
 		void BindDescSet(VkCommandBuffer commandBuffer, const VkDescriptorSet* descriptorSet) const;

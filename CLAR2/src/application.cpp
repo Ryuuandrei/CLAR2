@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <set>
 #include <unordered_map>
+#include <thread>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -19,7 +20,7 @@
 #include "utils/Timer.h"
 #include "imgui/imgui.h"
 
-#define PARTICLE_COUNT 8192
+#include <ranges>
 
 namespace CLAR {
 
@@ -42,7 +43,7 @@ namespace CLAR {
 	}
 
     void HelloTriangleApplication::run() {
-        //std::cout << "Hello Triangle!" << std::endl;
+        std::cout << "Hello Triangle!" << std::endl;
         initVulkan();
         //std::cout << "Vulkan initialized!" << std::endl;
         initImGui();
@@ -54,7 +55,7 @@ namespace CLAR {
     }
 
     void HelloTriangleApplication::initVulkan() {
-        camera = Camera(glm::vec3(0.0f, 1.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+        camera = Camera(glm::vec3(0.0f, 1.5f, 4.0f), glm::vec3(0.0f, 1.5f, 3.0f));
 
         m_Window.SetResizeCallback([&]() {
             CreateOffscreenRender();
@@ -74,8 +75,7 @@ namespace CLAR {
                     .Update(m_PostDescriptorSets[i], m_Device);
             }
 		});
-
-        m_OffscreenColor.resize(2);
+        m_OffscreenColor.resize(3);
         CreateOffscreenRender();
 
         m_DescriptorSetLayout.PushBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -86,15 +86,18 @@ namespace CLAR {
 
         m_DescriptorSets = m_DescriptorSetLayout.CreateSets();
 
-        renderSystem.Init(m_DescriptorSetLayout,
+        /*renderSystem.Init(m_DescriptorSetLayout,
 			m_OffscreenRenderPass,
 			m_Renderer.GetSwapChainExtent()
-		);
-        
-        m_PostDescriptorSetLayout.PushBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-        m_PostDescriptorSetLayout.PushBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+		);*/
+        m_PostDescriptorSetLayout.PushBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT);
+        m_PostDescriptorSetLayout.PushBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT);
+        m_PostDescriptorSetLayout.PushBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+        m_PostDescriptorSetLayout.PushBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+        m_PostDescriptorSetLayout.PushBinding(4, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
         m_PostDescriptorSets = m_PostDescriptorSetLayout.CreateSets();
+
         postSystem.Init(m_PostDescriptorSetLayout,
             m_Renderer.GetSwapChainRenderPass(),
             m_Renderer.GetSwapChainExtent(),
@@ -114,6 +117,9 @@ namespace CLAR {
         m_Models["cube"] = new Model();
         m_Models["cube"]->LoadModel("models/cube.obj");
 
+        m_Models["sponza"] = new Model();
+        m_Models["sponza"]->LoadModel("models/sponza.obj");
+
         m_Models["square"] = new Model();
         m_Models["square"]->LoadModel({ { {-1.5f, 0.f, -1.5f} },
                                             { {1.5f, 0.f, -1.5f} },
@@ -122,8 +128,14 @@ namespace CLAR {
             {0, 1, 3, 1, 2, 3}
         );
 
-        m_Models["casa"] = new Model();
+        /*m_Models["casa"] = new Model();
         m_Models["casa"]->LoadModel("models/Medieval_building.obj");
+
+        m_Models["horse"] = new Model();
+        m_Models["horse"]->LoadModel("models/horse.obj");*/
+
+        m_Models["koenigsegg"] = new Model();
+        m_Models["koenigsegg"]->LoadModel("models/koenigsegg.obj");
 
         //m_Models["house"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["house"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         //m_Models["house"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["house"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
@@ -137,8 +149,17 @@ namespace CLAR {
         m_Models["cube"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["cube"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         m_Models["cube"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["cube"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
-        m_Models["casa"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["casa"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["koenigsegg"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["koenigsegg"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["koenigsegg"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["koenigsegg"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+        m_Models["sponza"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["sponza"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["sponza"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["sponza"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+       /* m_Models["casa"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["casa"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         m_Models["casa"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["casa"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+        m_Models["horse"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["horse"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["horse"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["horse"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);*/
 
         // in real life use something like VulkanMemoryAllocator library because there is a limit on how many allocations
         // we can do on the gpu
@@ -160,8 +181,8 @@ namespace CLAR {
         auto white = std::make_shared<Lambertian>(glm::vec3(.73f, .73f, .73f));
         auto light = std::make_shared<DiffuseLight>(glm::vec3(1.0f), 8.1f);
 
-        m_Instances.emplace_back("Right Wall", Instance{ m_Models["square"], red, glm::vec3(1.5f, 1.5f, 0.0f), glm::vec3(1.f), glm::vec3(0.f, 0.f, 90.f), 0 });
-        m_Instances.emplace_back("Light", Instance{ m_Models["square"], light, glm::vec3(0.0f, 2.999f, 0.0f), glm::vec3(.3f), glm::vec3(0.f), 1 });
+        m_Instances.emplace_back("Right Wall", Instance{ m_Models["cube"], red, glm::vec3(1.5f, 1.5f, 0.0f), glm::vec3(3.f, 0.001f, 3.0f), glm::vec3(0.f, 0.f, 90.f), 0 });
+        m_Instances.emplace_back("Light", Instance{ m_Models["cube"], light, glm::vec3(0.0f, 2.999f, 0.0f), glm::vec3(1.f, 0.001f, 1.f), glm::vec3(0.f), 1 });
 
         m_Instances.emplace_back("Left Wall", Instance{ m_Models["square"], green, glm::vec3(-1.5f, 1.5f, 0.0f), glm::vec3(1.f), glm::vec3(0.f, 0.f, -90.f), 2 });
         m_Instances.emplace_back("Ground", Instance{ m_Models["square"], white, glm::vec3(0.0f), glm::vec3(1.f), glm::vec3(0.f), 3 });
@@ -169,7 +190,11 @@ namespace CLAR {
         m_Instances.emplace_back("Floor", Instance{ m_Models["square"], white, glm::vec3(0.0f, 3.f, 0.0f), glm::vec3(1.f), glm::vec3(180.f, 0.f, 0.f), 5 });
         m_Instances.emplace_back("Sphere", Instance{ m_Models["sphere"], left, glm::vec3(0.5f, 0.5f, 0.6f), glm::vec3(0.5f), glm::vec3(0.f, -15.f, 0.f), 6 });
         m_Instances.emplace_back("Cube", Instance{ m_Models["cube"], white, glm::vec3(-0.6f, 1.f, -0.5f), glm::vec3(1.f, 2.f, 1.f), glm::vec3(0.f, 18.f, 0.f), 7 });
-        m_Instances.emplace_back("Light2", Instance{ m_Models["square"], red, glm::vec3(0.0f, 1.999f, 0.0f), glm::vec3(.3f), glm::vec3(0.f), 8 });
+        m_Instances.emplace_back("Face as Wall", Instance{ m_Models["square"], white, glm::vec3(0.0f, 1.5f, -1.5f), glm::vec3(1.f), glm::vec3(90.f, 0.f, 0.f), 8 });
+
+
+        //m_Instances.emplace_back("sponza", Instance{ m_Models["sponza"], white, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(.3f), glm::vec3(0.f), 8 });
+        //m_Instances.emplace_back("Front Wall", Instance{ m_Models["square"], white, glm::vec3(0.0f, 1.5f, 1.5f), glm::vec3(1.f), glm::vec3(-90.f, 0.f, 0.f), 8 });
 
 
         //m_Instances.emplace_back("Casa", Instance{ m_Models["casa"], white, glm::vec3(0.0f), glm::vec3(1.f), glm::vec3(0.f), 8 });
@@ -211,8 +236,14 @@ namespace CLAR {
                     VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT)
             );
 
-            
+            m_PostUniformBuffers.emplace_back(
+                m_Allocator.CreateBuffer(sizeof(glm::mat4),
+                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT)
+            );
 		}
+
+
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
@@ -229,9 +260,14 @@ namespace CLAR {
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
+            auto postBufferInfo = m_PostUniformBuffers[i].DescriptorInfo();
+
             DescritorWriter()
-                .WriteImage(0, &m_OffscreenColor[(i - 1) % MAX_FRAMES_IN_FLIGHT].descriptor)
-                .WriteImage(1, &m_OffscreenColor[i].descriptor)
+                .WriteStorageImage(0, &m_OffscreenColor[(i - 1) % MAX_FRAMES_IN_FLIGHT].descriptor)
+                .WriteStorageImage(1, &m_OffscreenColor[i].descriptor)
+                .WriteStorageImage(2, &m_OffscreenColor[2].descriptor)
+                .WriteStorageImage(3, &m_OffscreenPositionBuffer.descriptor)
+                .WriteUniformBuffer(4, &postBufferInfo)
                 .Update(m_PostDescriptorSets[i], m_Device);
         }
 
@@ -361,7 +397,8 @@ namespace CLAR {
             //VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR;
 
             // write a function to get the device address of the element in buildas whose blasId is ins.blasId
-            auto blas = std::find_if(buildAs.begin(), buildAs.end(), [&](const ASBuildInfo& b) { return b.blasId == ins.model->id; });
+			auto blas = std::ranges::find_if(buildAs, [&](const ASBuildInfo& b) { return b.blasId == ins.model->id; });
+
             VkAccelerationStructureDeviceAddressInfoKHR addressInfo{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR };
             addressInfo.accelerationStructure = blas->as.handle;
             instance.accelerationStructureReference = vkGetAccelerationStructureDeviceAddressKHR(m_Device, &addressInfo);
@@ -397,7 +434,7 @@ namespace CLAR {
 
             if (m_Window.KeyState(GLFW_KEY_SPACE) == GLFW_PRESS) camera.MoveUp(dt);
 
-            if (m_Window.KeyState(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camera.MoveUp(-dt);
+            if (m_Window.KeyState(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.MoveUp(-dt);
 
             if (m_Window.KeyState(GLFW_KEY_Q) == GLFW_PRESS)
 			{
@@ -447,7 +484,11 @@ namespace CLAR {
         vkDestroyFramebuffer(m_Device, m_OffscreenFramebuffer, nullptr);
         m_Allocator.DestroyTexture(m_OffscreenColor[0]);
         m_Allocator.DestroyTexture(m_OffscreenColor[1]);
+        m_Allocator.DestroyTexture(m_OffscreenColor[2]);
+
         m_Allocator.DestroyTexture(m_OffscreenDepth);
+        m_Allocator.DestroyTexture(m_OffscreenPositionBuffer);
+
 
         vkDestroySampler(m_Device, m_TextureSampler, nullptr);
 
@@ -463,6 +504,7 @@ namespace CLAR {
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
 			m_Allocator.DestroyBuffer(m_UniformBuffers[i]);
+            m_Allocator.DestroyBuffer(m_PostUniformBuffers[i]);
 		}
 
         m_Allocator.DestroyAccelerationStructure(m_Tlas);
@@ -734,7 +776,32 @@ namespace CLAR {
             }*/
             if (useRaytracer)
             {
+
                 raytrace(commandBuffer, clearColor);
+
+                /*VkImageMemoryBarrier barrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                barrier.subresourceRange = {
+                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                        .levelCount = 1,
+                        .baseArrayLayer = 0,
+                        .layerCount = 1,
+                };
+                barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                barrier.image = m_OffscreenColor[m_Renderer.GetCurrentFrame()].image.image;
+                vkCmdPipelineBarrier(
+                    commandBuffer,
+                    VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
+                    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                    0,
+                    0, nullptr,
+                    0, nullptr,
+                    1, &barrier
+                );*/
             }
             else
             {
@@ -756,9 +823,11 @@ namespace CLAR {
 
             // QUAD bulshit and iamgui
             {
+                
                 m_Renderer.BeginRenderPass();
 
                 postSystem.Prepare(commandBuffer, &m_PostDescriptorSets[m_Renderer.GetCurrentFrame()]);
+                postSystem.PushConstants(commandBuffer, m_pcRay);
                 vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
                 ImGui::Render();
@@ -787,6 +856,9 @@ namespace CLAR {
 
         m_UniformBuffers[currentImage].Write(&ubo, sizeof(UniformBufferObject));
         m_BobjDesc.Write(m_ObjectDescriptions.data(), m_ObjectDescriptions.size() * sizeof(ObjDesc));
+
+        auto reprojectionMatrix = m_ProjMatrices[(currentImage - 1) % 2] * m_ViewMatrices[(currentImage - 1) % 2];
+        m_PostUniformBuffers[currentImage].Write(&reprojectionMatrix, sizeof(glm::mat4));
 
         if (m_InstanceUpdated)
         {
@@ -859,8 +931,8 @@ namespace CLAR {
     {
         
         m_RtDescriptorSetLayout.PushBinding(0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-        m_RtDescriptorSetLayout.PushBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-        m_RtDescriptorSetLayout.PushBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+        m_RtDescriptorSetLayout.PushBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_FRAGMENT_BIT);
+        m_RtDescriptorSetLayout.PushBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_FRAGMENT_BIT);
 
         m_RtDescriptorSets = m_RtDescriptorSetLayout.CreateSets();
 
@@ -874,8 +946,8 @@ namespace CLAR {
 
 			DescritorWriter()
 				.WriteAccelerationStructure(0, &descASInfo)
-				.WriteStorageImage(1, &m_OffscreenColor[(i - 1) % MAX_FRAMES_IN_FLIGHT].descriptor)
-                .WriteStorageImage(2, &m_OffscreenColor[i].descriptor)
+				.WriteStorageImage(1, &m_OffscreenPositionBuffer.descriptor)
+                .WriteStorageImage(2, &m_OffscreenColor[2].descriptor) // use the last image as a buffer for the path tracing calculation
 				.Update(m_RtDescriptorSets[i], m_Device);
 		}
     }
@@ -965,6 +1037,7 @@ namespace CLAR {
         m_Allocator.DestroyTexture(m_OffscreenColor[0]);
         m_Allocator.DestroyTexture(m_OffscreenColor[1]);
         m_Allocator.DestroyTexture(m_OffscreenDepth);
+        m_Allocator.DestroyTexture(m_OffscreenPositionBuffer);
 
         // color image
         {
@@ -985,20 +1058,24 @@ namespace CLAR {
             m_OffscreenColor[1].descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
         }
 
-        // fill the offscreencolor with black pixels
         {
-            /*m_Device.SingleTimeCommand([&](VkCommandBuffer commandBuffer) {
-                VkImageSubresourceRange subresourceRange = {};
-                subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                subresourceRange.baseMipLevel = 0;
-                subresourceRange.levelCount = 1;
-                subresourceRange.baseArrayLayer = 0;
-                subresourceRange.layerCount = 1;
+            Image image = m_Allocator.CreateImage(m_Renderer.GetSwapChainExtent(), m_OffscreenColorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+                | VK_IMAGE_USAGE_STORAGE_BIT);
 
-				VkClearColorValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-				vkCmdClearColorImage(commandBuffer, m_OffscreenColor[0].image.image, VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &subresourceRange);
-                vkCmdClearColorImage(commandBuffer, m_OffscreenColor[1].image.image, VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &subresourceRange);
-			});*/
+            m_OffscreenColor[2] = m_Allocator.CreateTexture(image, m_OffscreenColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+            m_Device.transitionImageLayout(image.image, m_OffscreenColorFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, 1);
+            m_OffscreenColor[2].descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+        }
+
+
+        // position buffer
+        {
+            Image image = m_Allocator.CreateImage(m_Renderer.GetSwapChainExtent(), m_OffscreenPositionBufferFormat, VK_IMAGE_USAGE_SAMPLED_BIT
+				| VK_IMAGE_USAGE_STORAGE_BIT);
+            
+			m_OffscreenPositionBuffer = m_Allocator.CreateTexture(image, m_OffscreenPositionBufferFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+            m_Device.transitionImageLayout(image.image, m_OffscreenPositionBufferFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, 1);
+            m_OffscreenPositionBuffer.descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
         }
 
 

@@ -7,7 +7,7 @@ namespace CLAR {
 		PostSystem(Device& device) : RenderSystem(device) {}
 		~PostSystem() = default;
 
-		virtual void CreatePipeline(
+		void CreatePipeline(
 			VkRenderPass renderPass,
 			VkExtent2D extent,
 			const std::filesystem::path& vertShaderPath = "../shaders/post.vert.spv",
@@ -24,5 +24,29 @@ namespace CLAR {
 
 			m_Pipeline->Init(builder);
 		}
+
+		void CreatePipelineLayout(const VkDescriptorSetLayout* descriptorSetLayout) override
+		{
+			VkPushConstantRange pushConstant{ VK_SHADER_STAGE_FRAGMENT_BIT,
+								 0, sizeof(PushConstantRay) };
+
+			VkPipelineLayoutCreateInfo pipelineLayoutInfo{
+				.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+				.setLayoutCount = descriptorSetLayout ? 1u : 0u,
+				.pSetLayouts = descriptorSetLayout,
+				.pushConstantRangeCount = 1,
+				.pPushConstantRanges = &pushConstant
+			};
+
+			if (vkCreatePipelineLayout(m_Device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
+				throw std::runtime_error("failed to create pipeline layout!");
+			}
+		}
+
+
+		template<typename T>
+		void PushConstants(VkCommandBuffer commandBuffer, const T& pcRay) const { vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(T), &pcRay); }
+
+		void PushConstants(VkCommandBuffer commandBuffer, uint32_t size, const void* pcRay) const { vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, size, pcRay); }
 	};
 }

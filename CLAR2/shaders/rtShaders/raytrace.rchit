@@ -107,7 +107,7 @@ void sampleLight(vec2 seed, out vec3 pos, out vec3 normal, out uint hitLightInde
 	Indices    indices     = Indices(objResource.indexAddress);
     Vertices   vertices    = Vertices(objResource.vertexAddress);
 
-    uint triIdx = uint(random(seed + 1) * 2);
+    uint triIdx = uint(8 + random(seed + 1) * 2);
 
 	// Indices of the triangle
     ivec3 i = indices.i[triIdx];

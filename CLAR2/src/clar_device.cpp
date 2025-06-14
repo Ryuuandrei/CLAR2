@@ -25,6 +25,8 @@ namespace CLAR {
     PFN_vkCmdWriteAccelerationStructuresPropertiesKHR vkCmdWriteAccelerationStructuresPropertiesKHR;
     PFN_vkCmdCopyAccelerationStructureKHR vkCmdCopyAccelerationStructureKHR;
     PFN_vkCmdTraceRaysNV vkCmdTraceRaysNV;
+    PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT;
+    PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT;
 
 	Device::Device(Window& window) : m_Window{window}
 	{
@@ -46,7 +48,9 @@ namespace CLAR {
         CLAR::vkCmdTraceRaysKHR = LoadFunction<PFN_vkCmdTraceRaysKHR>(m_Device, "vkCmdTraceRaysKHR");
         CLAR::vkCmdWriteAccelerationStructuresPropertiesKHR = LoadFunction<PFN_vkCmdWriteAccelerationStructuresPropertiesKHR>(m_Device, "vkCmdWriteAccelerationStructuresPropertiesKHR");
         CLAR::vkCmdCopyAccelerationStructureKHR = LoadFunction<PFN_vkCmdCopyAccelerationStructureKHR>(m_Device, "vkCmdCopyAccelerationStructureKHR");
-	    CLAR::vkCmdTraceRaysNV = LoadFunction<PFN_vkCmdTraceRaysNV>(m_Device, "vkCmdTraceRaysNV");
+	    /*CLAR::vkCmdTraceRaysNV = LoadFunction<PFN_vkCmdTraceRaysNV>(m_Device, "vkCmdTraceRaysNV");
+        CLAR::vkCmdBeginDebugUtilsLabelEXT = LoadFunction<PFN_vkCmdBeginDebugUtilsLabelEXT>(m_Device, "vkCmdBeginDebugUtilsLabelEXT");
+        CLAR::vkCmdEndDebugUtilsLabelEXT = LoadFunction<PFN_vkCmdEndDebugUtilsLabelEXT>(m_Device, "vkCmdEndDebugUtilsLabelEXT");*/
     }
 
     QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice device) const
@@ -186,6 +190,11 @@ namespace CLAR {
             MsaaSamples = getMaxUsableSampleCount();
         }
         else {
+            m_PhysicalDevice = candidates.rbegin()->second;
+            VkPhysicalDeviceProperties deviceProperties;
+            vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
+            std::cout << RED("Best device: ") << deviceProperties.deviceName << '\n';
+            std::cout << deviceCount << " devices found, but none are suitable." << std::endl;
             throw std::runtime_error("failed to find a suitable GPU!");
         }
 
@@ -204,6 +213,7 @@ namespace CLAR {
         for (uint32_t i = 0; i < extensionCount; ++i) {
             printf("Extension %d: %s\n", i, availableExtensions[i].extensionName);
         }*/
+
         QueueFamilyIndices indices = findQueueFamilies(m_PhysicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -225,6 +235,7 @@ namespace CLAR {
         VkPhysicalDeviceFeatures deviceFeatures{
             .sampleRateShading = VK_TRUE,
             .samplerAnisotropy = VK_TRUE,
+            .fragmentStoresAndAtomics = VK_TRUE,
             .shaderFloat64 = VK_TRUE,
             .shaderInt64 = VK_TRUE,
         };
@@ -296,6 +307,7 @@ namespace CLAR {
         {
             throw std::runtime_error("failed to create logical device!");
         }
+
 
         vkGetDeviceQueue(m_Device, indices.graphicsFamily.value(), 0, &m_GraphicsQueue);
         vkGetDeviceQueue(m_Device, indices.presentFamily.value(), 0, &m_PresentQueue);

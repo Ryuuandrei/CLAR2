@@ -94,6 +94,7 @@ namespace CLAR {
         std::unordered_map<std::string, Model*> m_Models;
 
         std::vector<Buffer> m_UniformBuffers;
+        std::vector<Buffer> m_PostUniformBuffers;
         std::vector<Buffer> m_ComputeUniformBuffers;
 
         UniformBufferObject ubo{};
@@ -152,12 +153,14 @@ namespace CLAR {
         std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> m_RtDescriptorSets;
         void CreateRtDescriptorSets();
 
-        VkRenderPass    m_OffscreenRenderPass{ VK_NULL_HANDLE };
-        VkFramebuffer   m_OffscreenFramebuffer{ VK_NULL_HANDLE };
-        std::vector<Texture>        m_OffscreenColor;
-        Texture        m_OffscreenDepth;
-        VkFormat        m_OffscreenColorFormat{ VK_FORMAT_R32G32B32A32_SFLOAT };
-        VkFormat        m_OffscreenDepthFormat{ VK_FORMAT_X8_D24_UNORM_PACK32 };
+        VkRenderPass         m_OffscreenRenderPass{ VK_NULL_HANDLE };
+        VkFramebuffer        m_OffscreenFramebuffer{ VK_NULL_HANDLE };
+        std::vector<Texture> m_OffscreenColor;
+        Texture              m_OffscreenPositionBuffer;
+        Texture              m_OffscreenDepth;
+        VkFormat             m_OffscreenColorFormat{ VK_FORMAT_R32G32B32A32_SFLOAT };
+        VkFormat             m_OffscreenDepthFormat{ VK_FORMAT_X8_D24_UNORM_PACK32 };
+        VkFormat             m_OffscreenPositionBufferFormat{ VK_FORMAT_R32G32B32A32_SFLOAT };
         void CreateOffscreenRender();
 
         void CreateRtShaderBindingTable();

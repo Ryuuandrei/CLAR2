@@ -54,7 +54,7 @@ namespace CLAR {
 
 	void RayTracingSystem::CreatePipelineLayout(const std::vector<VkDescriptorSetLayout>& descriptorSetLayout)
 	{
-		VkPushConstantRange pushConstant{ VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
+		VkPushConstantRange pushConstant{ VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR | VK_SHADER_STAGE_FRAGMENT_BIT,
 								 0, sizeof(PushConstantRay) };
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{
