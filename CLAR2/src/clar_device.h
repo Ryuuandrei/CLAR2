@@ -116,7 +116,8 @@ namespace CLAR {
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
 
 		template<typename T>
-		auto LoadFunction(VkDevice device, const char* name) {
+		auto LoadFunction(VkDevice device, const char* name)
+		{
 			T func = (T)vkGetDeviceProcAddr(device, name);
 			if (func != nullptr)
 				return func;

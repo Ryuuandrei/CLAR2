@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <array>
+#include <ranges>
 
 namespace CLAR {
 
@@ -69,10 +70,12 @@ namespace CLAR {
 
     VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const
     {
-        for (const auto& availableFormat : availableFormats) {
+        /*for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
                 return availableFormat;
-        }
+        }*/
+        if (auto it = std::ranges::find_if(availableFormats, [](const VkSurfaceFormatKHR& surfaceFormat) { return surfaceFormat.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR; }); it != availableFormats.end())
+            return *it;
 
         return availableFormats[0];
     }

@@ -8,8 +8,7 @@ layout(binding = 0, rgba32f) uniform readonly image2D u_LastAccumulatedTxt;
 layout(binding = 1, rgba32f) uniform writeonly image2D u_CurrentAccumulatedTxt;
 layout(binding = 2, rgba32f) uniform readonly image2D u_CurrentnoisyTxt;
 layout(binding = 3, rgba32f) uniform readonly image2D u_PositionMap;
-
-// the general flow is u_lastAccumulatedTxt + u_currentnoisyTxt = u_currentAccumulatedTxt
+// u_lastAccumulatedTxt + u_currentnoisyTxt = u_currentAccumulatedTxt
 
 layout(binding = 4) uniform UBO
 {
@@ -25,7 +24,7 @@ layout(push_constant) uniform _PushConstantRay {
 
 vec3 RGBToYCoCg (const in vec3 rgbColor)
 {
-	return rgbColor;
+//	return rgbColor;
 	const mat3 colorTransformMatrix = mat3 (
 		0.25f, 0.5f, -0.25f,
 		0.5f, 0.0f, 0.5f,
@@ -37,7 +36,7 @@ vec3 RGBToYCoCg (const in vec3 rgbColor)
 
 vec3 YCoCgToRGB (const in vec3 YCoCgColor)
 {
-	return YCoCgColor;
+//	return YCoCgColor;
 	const mat3 colorTransformMatrix = mat3 (
 		1.f, 1.f, 1.f,
 		1.f, 0.f, -1.f,
@@ -86,15 +85,10 @@ void main()
     float gamma = 1. / 2.0;
     //  fragColor   = clamp(pow(texture(noisyTxt, uv).rgba, vec4(gamma)), 0.0, 1.0);
     vec4 currentColor = imageLoad(u_CurrentnoisyTxt, ivec2(gl_FragCoord));
+//	fragColor = currentColor;
+//	return;
 
     vec4 position = imageLoad(u_PositionMap, ivec2(gl_FragCoord));
-
-//    if (position == vec4(0.0, 0.0, 0.0, 1.0))
-//    {
-//		imageStore(u_CurrentAccumulatedTxt, ivec2(gl_FragCoord), currentColor);
-//		fragColor = currentColor;
-//		return;
-//	}
 
     vec4 prevClip = reprojectionMatrix * position;
     vec2 prevNDC = prevClip.xy / prevClip.w;
@@ -123,12 +117,6 @@ void main()
 
 	float blendWeight = pow(0.95, pcRay.deltaTime * 60.0);
     
-//    if (lastColor == vec4(0.0, 0.0, 0.0, 1.0))
-//	{
-//		imageStore(currentnoisyTxt, ivec2(gl_FragCoord), currentColor);
-//        fragColor = currentColor;
-//		return;
-//	}
     vec3 finalColor = mix(currentColor.xyz, clampedTemporalFilterColor, blendWeight);
     imageStore(u_CurrentAccumulatedTxt, ivec2(gl_FragCoord.xy), vec4(finalColor, 1.0));
 

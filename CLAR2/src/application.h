@@ -58,6 +58,7 @@ namespace CLAR {
         {
             float fuzz;
             float refractionIndex;
+            float lightIntensity;
         };
     };
 

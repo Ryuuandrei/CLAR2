@@ -3,6 +3,7 @@
 #include <set>
 #include <unordered_map>
 #include <thread>
+#include <future>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -105,20 +106,33 @@ namespace CLAR {
             "shaders/post.frag.spv"
         );
 
-        tm.LoadFromFile("textures/texture.jpg", "tex", true);
-        tm.LoadFromFile("textures/viking_room.png", "vik", true);
+        /*tm.LoadFromFile("textures/texture.jpg", "tex", true);
+        tm.LoadFromFile("textures/viking_room.png", "vik", true);*/
 
         /*m_Models["house"] = new Model();
         m_Models["house"]->LoadModel("models/Medieval_building.obj");*/
 
+        auto asyncLoad = [](Model* model, const std::string& path) {
+            model->LoadModel(path);
+		};
+
         m_Models["sphere"] = new Model();
-        m_Models["sphere"]->LoadModel("models/sphere.obj");
+        //m_Models["sphere"]->LoadModel("models/sphere.obj");
 
         m_Models["cube"] = new Model();
-        m_Models["cube"]->LoadModel("models/cube.obj");
+        //m_Models["cube"]->LoadModel("models/cube.obj");
 
-        m_Models["sponza"] = new Model();
-        m_Models["sponza"]->LoadModel("models/sponza.obj");
+        m_Models["grandPiano"] = new Model();
+        //m_Models["grandPiano"]->LoadModel("models/grandPiano.obj");
+
+        m_Models["glass"] = new Model();
+        //m_Models["glass"]->LoadModel("models/glass.obj");
+
+        m_Models["rose"] = new Model();
+        //m_Models["rose"]->LoadModel("models/rose.obj");
+
+        /*m_Models["sponza"] = new Model();
+        m_Models["sponza"]->LoadModel("models/sponza.obj");*/
 
         m_Models["square"] = new Model();
         m_Models["square"]->LoadModel({ { {-1.5f, 0.f, -1.5f} },
@@ -127,15 +141,25 @@ namespace CLAR {
                                             { {-1.5f, 0.f, 1.5f} } },
             {0, 1, 3, 1, 2, 3}
         );
+        m_Models["koenigsegg"] = new Model();
+        m_Models["watchtower"] = new Model();
+
+
+
+        std::async(std::launch::async, asyncLoad, m_Models["sphere"], "models/sphere.obj");
+        std::async(std::launch::async, asyncLoad, m_Models["cube"], "models/cube.obj");
+        std::async(std::launch::async, asyncLoad, m_Models["grandPiano"], "models/grandPiano.obj");
+        std::async(std::launch::async, asyncLoad, m_Models["glass"], "models/glass.obj");
+        std::async(std::launch::async, asyncLoad, m_Models["watchtower"], "models/watchtower.obj");
+        std::async(std::launch::async, asyncLoad, m_Models["koenigsegg"], "models/koenigsegg.obj");
+        std::async(std::launch::async, asyncLoad, m_Models["rose"], "models/rose.obj").get();
+
 
         /*m_Models["casa"] = new Model();
         m_Models["casa"]->LoadModel("models/Medieval_building.obj");
 
         m_Models["horse"] = new Model();
         m_Models["horse"]->LoadModel("models/horse.obj");*/
-
-        m_Models["koenigsegg"] = new Model();
-        m_Models["koenigsegg"]->LoadModel("models/koenigsegg.obj");
 
         //m_Models["house"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["house"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         //m_Models["house"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["house"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
@@ -149,11 +173,23 @@ namespace CLAR {
         m_Models["cube"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["cube"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         m_Models["cube"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["cube"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
+        m_Models["grandPiano"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["grandPiano"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["grandPiano"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["grandPiano"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+        m_Models["glass"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["glass"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["glass"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["glass"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+        m_Models["rose"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["rose"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["rose"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["rose"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
         m_Models["koenigsegg"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["koenigsegg"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         m_Models["koenigsegg"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["koenigsegg"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
-        m_Models["sponza"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["sponza"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-        m_Models["sponza"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["sponza"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["watchtower"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["watchtower"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        m_Models["watchtower"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["watchtower"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+        //m_Models["sponza"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["sponza"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        //m_Models["sponza"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["sponza"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
        /* m_Models["casa"]->m_VertexBuffer = m_Allocator.CreateBuffer(m_Models["casa"]->mesh, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         m_Models["casa"]->m_IndexBuffer = m_Allocator.CreateBuffer(m_Models["casa"]->indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
@@ -164,9 +200,9 @@ namespace CLAR {
         // in real life use something like VulkanMemoryAllocator library because there is a limit on how many allocations
         // we can do on the gpu
 
-        auto ground = std::make_shared<Lambertian>(glm::vec3(0.8f, 0.8f, 0.0f));
+        auto ground = std::make_shared<Lambertian>(glm::vec3(0.4f, 0.4f, 0.0f));
         auto center = std::make_shared<Lambertian>(glm::vec3(0.1f, 0.2f, 0.5f));
-        auto left = std::make_shared<Dielectric>(1.5f);
+        auto left = std::make_shared<Dielectric>(1.492f);
         auto left2 = std::make_shared<Dielectric>(1.f / 1.5f);
         auto right = std::make_shared<Metal>(glm::vec3(0.8f, 0.85f, 0.88f), 0.0f);
 
@@ -179,8 +215,14 @@ namespace CLAR {
         auto red = std::make_shared<Lambertian>(glm::vec3(.65f, .05f, .05f));
         auto green = std::make_shared<Lambertian>(glm::vec3(.12f, .45f, .15f));
         auto white = std::make_shared<Lambertian>(glm::vec3(.73f, .73f, .73f));
-        auto light = std::make_shared<DiffuseLight>(glm::vec3(1.0f), 8.1f);
+        auto light = std::make_shared<DiffuseLight>(glm::vec3(2.0f), 8.1f);
+        auto light2 = std::make_shared<DiffuseLight>(glm::vec3(1.0f), 8.1f);
 
+		auto black = std::make_shared<Metal>(glm::vec3(0.031f), 0.06f);
+        auto brown = std::make_shared<Lambertian>(glm::vec3(0.4f, 0.2f, 0.1f));
+        auto pink = std::make_shared<Lambertian>(glm::vec3(0.531f, 0.094f, 0.094f));
+
+# if 0
         m_Instances.emplace_back("Right Wall", Instance{ m_Models["cube"], red, glm::vec3(1.5f, 1.5f, 0.0f), glm::vec3(3.f, 0.001f, 3.0f), glm::vec3(0.f, 0.f, 90.f), 0 });
         m_Instances.emplace_back("Light", Instance{ m_Models["cube"], light, glm::vec3(0.0f, 2.999f, 0.0f), glm::vec3(1.f, 0.001f, 1.f), glm::vec3(0.f), 1 });
 
@@ -190,10 +232,35 @@ namespace CLAR {
         m_Instances.emplace_back("Floor", Instance{ m_Models["square"], white, glm::vec3(0.0f, 3.f, 0.0f), glm::vec3(1.f), glm::vec3(180.f, 0.f, 0.f), 5 });
         m_Instances.emplace_back("Sphere", Instance{ m_Models["sphere"], left, glm::vec3(0.5f, 0.5f, 0.6f), glm::vec3(0.5f), glm::vec3(0.f, -15.f, 0.f), 6 });
         m_Instances.emplace_back("Cube", Instance{ m_Models["cube"], white, glm::vec3(-0.6f, 1.f, -0.5f), glm::vec3(1.f, 2.f, 1.f), glm::vec3(0.f, 18.f, 0.f), 7 });
-        m_Instances.emplace_back("Face as Wall", Instance{ m_Models["square"], white, glm::vec3(0.0f, 1.5f, -1.5f), glm::vec3(1.f), glm::vec3(90.f, 0.f, 0.f), 8 });
+        m_Instances.emplace_back("Sphere2", Instance{ m_Models["sphere"], left, glm::vec3(0.5f, 0.5f, 0.6f), glm::vec3(0.5f), glm::vec3(0.f, -15.f, 0.f), 8 });
+        m_Instances.emplace_back("Sphere3", Instance{ m_Models["sphere"], left, glm::vec3(0.5f, 0.5f, 0.6f), glm::vec3(0.5f), glm::vec3(0.f, -15.f, 0.f), 9 });
+
+        //m_Instances.emplace_back("Face as Wall", Instance{ m_Models["square"], white, glm::vec3(0.0f, 1.5f, -1.5f), glm::vec3(1.f), glm::vec3(90.f, 0.f, 0.f), 8 });
+
+        /*for (int i = 0; i < 10; ++i)
+        {
+            m_Instances.emplace_back("wall " + std::to_string(i), Instance{m_Models["cube"], red, glm::vec3(1.5f, 1.5f, 0.0f), glm::vec3(3.f, 0.001f, 3.0f), glm::vec3(0.f, 0.f, 90.f), 9u + i});
+
+		}*/
+
+		// make a brown material
+# else
+		m_Instances.emplace_back("Ground", Instance{ m_Models["square"], brown, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.f), glm::vec3(0.f), 0 });
+		m_Instances.emplace_back("Piano", Instance{ m_Models["grandPiano"], black, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(.01f), glm::vec3(-90.f, 0.f, 0.f), 1 });
+        m_Instances.emplace_back("Glass", Instance{ m_Models["glass"], left, glm::vec3(0.992f, 1.206f, -.537f), glm::vec3(.0008f), glm::vec3(0.f), 2 });
+        m_Instances.emplace_back("Rose", Instance{ m_Models["rose"], pink, glm::vec3(0.978f, 1.237f, -.565f), glm::vec3(.003f), glm::vec3(22.7f, -17.603, 1.375), 3 });
+        m_Instances.emplace_back("Light1", Instance{ m_Models["cube"], light, glm::vec3(13.359f, 8.085f, -.094f), glm::vec3(3.840f, 0.001f, 3.840f), glm::vec3(0.f, 0.f, -60.646f), 4 });
+        m_Instances.emplace_back("Light2", Instance{ m_Models["cube"], light2, glm::vec3(5.818f, 1.335f, -0.965f), glm::vec3(1.f, 0.001f, 1.f), glm::vec3(0.f), 5 });
+        m_Instances.emplace_back("koenigsegg", Instance{ m_Models["koenigsegg"], white, glm::vec3(7.365f, 0.f, 0.0f), glm::vec3(0.08f), glm::vec3(0.f), 6 });
+        m_Instances.emplace_back("Back Wall", Instance{ m_Models["square"], white, glm::vec3(0.0f, 1.5f, -1.5f), glm::vec3(1.f), glm::vec3(90.f, 0.f, 0.f), 7 });
+        m_Instances.emplace_back("Watch Tower", Instance{ m_Models["watchtower"], white, glm::vec3(0.0f, 1.5f, -1.5f), glm::vec3(1.f), glm::vec3(0.f, 0.f, 0.f), 8 });
 
 
-        //m_Instances.emplace_back("sponza", Instance{ m_Models["sponza"], white, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(.3f), glm::vec3(0.f), 8 });
+
+# endif
+
+
+        //m_Instances.emplace_back("sponza", Instance{ m_Models["sponza"], white, glm::vec3(0.0f, -3.74f, -1.81f), glm::vec3(.01f), glm::vec3(0.f, 90.f, 0.f), 0 });
         //m_Instances.emplace_back("Front Wall", Instance{ m_Models["square"], white, glm::vec3(0.0f, 1.5f, 1.5f), glm::vec3(1.f), glm::vec3(-90.f, 0.f, 0.f), 8 });
 
 
@@ -982,7 +1049,6 @@ namespace CLAR {
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
             | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR,
             VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT);
-        //m_debug.setObjectName(m_rtSBTBuffer.buffer, std::string("SBT"));  // Give it a debug name for NSight.
 
         VkDeviceAddress sbtAddress = m_Device.GetBufferDeviceAddress(m_rtSBTBuffer.buffer);
         m_rgenRegion.deviceAddress = sbtAddress;

@@ -67,20 +67,20 @@ struct ObjDesc
     float fuzz;
 };
 
+struct Light {
+    mat4 matrix;
+    uint index;
+};
+
 hitAttributeEXT vec3 attribs;
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;
 
 layout(buffer_reference, scalar) buffer Vertices {Vertex v[]; }; // Positions of an object
 layout(buffer_reference, scalar) buffer Indices {ivec3 i[]; }; // Triangle indices
-
-struct Light {
-    mat4 matrix;
-    uint index;
-};
-
 layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
 layout(set = 1, binding = 1, scalar) buffer ObjDesc_ { ObjDesc i[]; } objDesc;
+
 layout(set = 1, binding = 2, scalar) buffer LightBuffer {
     Light lights[];
 } lb;
@@ -99,6 +99,8 @@ float scattering(vec3 normal, vec3 dir)
 
 void sampleLight(vec2 seed, out vec3 pos, out vec3 normal, out uint hitLightIndex)
 {
+
+    // Step 1: Get all attributes
 	uint idx = uint(random(seed) * float(pcRay.lightsNumber));
 
     mat4 model = lb.lights[idx].matrix;
@@ -174,6 +176,19 @@ void main()
         vec3 lightPos;
         vec3 lightNrm;
         uint idx;
+
+        if (pcRay.lightsNumber > 0)
+        {
+            // Sample a light source
+            sampleLight((worldNrm + worldPos).xy, lightPos, lightNrm, idx);
+        }
+        else
+        {
+            // If no lights are present, use a default position and normal
+            prd.nextDirection = cosineSample;
+            prd.hitValue *= albedo;
+            return;
+        }
         sampleLight((worldNrm + worldPos).yx, lightPos, lightNrm, idx);
         vec3 lightSampleDir = lightPos - worldPos;
         float light_dist_squared = dot(lightSampleDir, lightSampleDir);
@@ -198,9 +213,6 @@ void main()
         float pdf_light = light_dist_squared / (lightArea * light_cosine);
 
         // Multiple Importance Sampling (MIS)
-//        float weight_cos = pdf_cos / (pdf_cos + pdf_light);
-//        float weight_light = pdf_light / (pdf_cos + pdf_light);
-
         prd.hitValue *= pdf_cos;
         prd.hitValue /= (p * pdf_cos + (1.0-p) * pdf_light);
 
